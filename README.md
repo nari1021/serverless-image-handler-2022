@@ -37,24 +37,24 @@ AWS Serverless Image Handler를 Fork 해서 제가 사용하면서 필요한 기
 
 ### image-handler/image-request.js
 
-    환경 변수로 설정한 sourceBuckets에 target_bucket_name이 있는지 확인하는 메서드
+    환경 변수로 설정한 sourceBuckets에 targetBucket이 있는지 확인하는 메서드
 
 기존 sourceBuckets에서는 가장 앞 Bucket만 반환하도록 되어있었지만,
-필요에 따라 multi Bucket을 사용할 수 있도록 target_bucket_name의 존재 유무를 확인하도록 추가함.
+필요에 따라 multi Bucket을 사용할 수 있도록 targetBucket의 존재 유무를 확인하도록 추가함.
 
 ```javascript
 /**
  * Parses the name of the appropriate Amazon S3 bucket to source the original image from.
  * @param sourceBuckets Lambda source buckets list.
- * @param target_bucket_name Image handler request buekct name alias.
+ * @param targetBucket Image handler request buekct name alias.
  * @returns The name of the appropriate Amazon S3 bucket.
  */
-checkImageBucket(sourceBuckets, target_bucket_name) {
+checkImageBucket(sourceBuckets, targetBucket) {
     const { DEFAULT_FALLBACK_IMAGE_BUCKET } = process.env;
     let find_bucket_name = DEFAULT_FALLBACK_IMAGE_BUCKET;
 
     sourceBuckets.forEach((currentElement) => {
-        if (currentElement.includes(target_bucket_name)) {
+        if (currentElement.includes(targetBucket)) {
             find_bucket_name = currentElement;
         }
     });
