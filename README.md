@@ -4,8 +4,8 @@ AWS Serverless Image Handler를 Fork 해서 제가 사용하면서 필요한 기
 
 ## To-do list
 
-    [X] Multi Bucket 사용 가능하도록 기능 추가
-    [ ] Multi Bucket에 따른 default image 사용가능 하도록 기능 추가
+- [x] Multi Bucket 사용 가능하도록 기능 추가
+- [x] Key path에 따른 default image 사용 가능 하도록 기능 추가
 
 > ## [Solution Overview](https://github.com/aws-solutions/serverless-image-handler#solution-overview)
 >
@@ -33,7 +33,7 @@ AWS Serverless Image Handler를 Fork 해서 제가 사용하면서 필요한 기
 | `CORS_ENABLED`                  | CORS 활성화 여부                              |
 | `CORS_ORIGIN`                   | CORS Origin 설정                              |
 
-## 추가 기능 checkImageBucket()
+## 추가 기능 1. checkImageBucket()
 
 ### image-handler/image-request.js
 
@@ -60,6 +60,41 @@ checkImageBucket(sourceBuckets, targetBucket) {
     });
 
     return find_bucket_name;
+}
+```
+
+## 추가 기능 2. 각 폴더에 대한 default 이미지 사용 가능하도록 기능 추가
+
+### image-handler/image-request.js
+
+    s3Client.getObject() 메서드를 이용해서 현재 Key 가 유효한지 확인
+
+Key가 잘못 되었다면, Key의 path에 default.jpg 이미지가 있는지 확인하여 있다면 해당 path의 default.jpg 이미지를 반환하고, 없다면 환경변수로 지정해 준 Bucket의 default.jpg 이미지를 반환 함.
+
+```javascript
+   /**
+     * Initializer function for creating a new image request, used by the image handler to perform image modifications.
+     * @param event Lambda request body.
+     * @returns Initialized image request information.
+     */
+    setup(event) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                ...
+                try {
+                    const imageLocation = { Bucket: imageRequestInfo.bucket, Key: imageRequestInfo.key };
+                    yield this.s3Client.getObject(imageLocation).promise();
+                }
+                catch {
+                    const originKey = imageRequestInfo.key;
+                    imageRequestInfo.key = originKey.substring(0, originKey.lastIndexOf('/') + 1) + "default.jpg";
+                }
+                ...
+            }
+            catch {...}
+        });
+    }
+
 }
 ```
 

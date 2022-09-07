@@ -60,6 +60,14 @@ class ImageRequest {
           imageRequestInfo.requestType,
           imageRequestInfo.key,
         );
+        try {
+          const imageLocation = {Bucket: imageRequestInfo.bucket, Key: imageRequestInfo.key};
+          yield this.s3Client.getObject(imageLocation).promise();
+        } catch {
+          const originKey = imageRequestInfo.key;
+          imageRequestInfo.key =
+            originKey.substring(0, originKey.lastIndexOf('/') + 1) + 'default.jpg';
+        }
         imageRequestInfo.edits = this.parseImageEdits(event, imageRequestInfo.requestType);
         const originalImage = yield this.getOriginalImage(
           imageRequestInfo.bucket,
